@@ -1,0 +1,52 @@
+# Arquivos de ajuda
+HELP.md
+
+# Pastas de build
+/target/
+/build/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# IDEs
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+# Logs e arquivos temporários
+*.log
+*.tmp
+*.temp
+*.class
+.DS_Store
+Thumbs.db
+
+# Spring Boot arquivos sensíveis
+/application.properties
+/application.yml
+
+# Docker Compose override (opcional)
+docker-compose.override.yml
