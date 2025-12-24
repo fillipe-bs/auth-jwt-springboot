@@ -1,5 +1,7 @@
 package io.fillipe.auth_api.service;
 
+import io.fillipe.auth_api.exception.InvalidPasswordException;
+import io.fillipe.auth_api.exception.UserNotFoundException;
 import io.fillipe.auth_api.model.User;
 import io.fillipe.auth_api.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -31,21 +33,42 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    //2. Autenticar/login
-    public Optional<User> authenticate(String email, String rawPassword) {
-        //Consulta email no banco de dados via userRepository
-        //Retorna Optional pq pode existir ou não correspondência na consulta
-        Optional<User> userOptional = userRepository.findByEmail(email);
-        //Se existir correspondência, compara as senhas via lógica do BCryptPasswordEncoder
-        if (userOptional.isPresent() && passwordEncoder.matches(rawPassword, userOptional.get().getPassword())) {
-            //Se if = true, então usuário existe, a senha é válida e a autenticação foi bem sucedida
-            return userOptional;
+
+    // 2. Buscar usuário pelo email
+    public User getByEmail(String email) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+
+        if (optionalUser.isEmpty()) {
+            throw new RuntimeException("User not found");
         }
-        //Caso usuário não exista ou senha inválida
-        return Optional.empty();
+
+        return optionalUser.get();
     }
 
-    //3. Buscar usuário
+    //3. Autenticar/login
+    public User authenticate(String email, String rawPassword) {
+        //Buscar usuário por email
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+
+        //Verificar se existe usuário
+        if (optionalUser.isEmpty()){
+            throw new UserNotFoundException("User not found");
+        }
+
+        //Extrair o usuário de dentro do Optional
+        User user = optionalUser.get();
+
+        //Verificar se a senha informada corresponde com a senha salva (has)
+        boolean passwordMatches = passwordEncoder.matches(rawPassword, user.getPassword());
+        if (!passwordMatches){
+            throw new InvalidPasswordException("Invalid password");
+        }
+
+        //Retorno se login for válido
+        return user;
+    }
+
+    //4. Buscar usuário
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
@@ -53,10 +76,14 @@ public class UserService {
         return userRepository.findById(id);
     }
 
-    //4. Atualizar senha
-    public User updatePassword(User user, String newPassword){
+    //5. Atualizar senha
+    public User updatePassword(User user, String oldPassword, String newPassword){
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new RuntimeException("Invalid current password");
+        }
         user.setPassword(passwordEncoder.encode(newPassword));
         return userRepository.save(user);
     }
+
 
 }
